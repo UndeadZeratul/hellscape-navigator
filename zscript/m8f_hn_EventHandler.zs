@@ -63,6 +63,9 @@ class m8f_hn_EventHandler : hn_InitializedEventHandler
   override
   void WorldTick()
   {
+    // Find the Hideous Helmet Service if it exists
+    if (!_HHFunc) _HHFunc = ServiceIterator.Find("HHFunc").Next();
+	
     if (level.time == 1)
       {
         _isWorldLoaded            = true;
@@ -153,8 +156,12 @@ class m8f_hn_EventHandler : hn_InitializedEventHandler
   override
   void RenderOverlay(RenderEvent e)
   {
+  // Check for Hideous Helmet
+	bool helmet = !_HHFunc || _HHFunc.GetIntUI("GetShowHUD", ObjectArg: StatusBar.cplayer.mo);
+  
     if (_isTitlemap) { return; }
     if (automapActive && !_settings.showOnAutomap()) { return; }
+    if (!helmet) { return; }
 
     PlayerInfo player = players[consolePlayer];
 
@@ -268,6 +275,8 @@ class m8f_hn_EventHandler : hn_InitializedEventHandler
   private ui
   void MaybeDrawMapName()
   {
+    // 	if (!_helmet) { return; }
+  
     if (_settings.showIntroLevelName() && _mapNameAlpha > 0.0)
     {
       Font   font    = bigFont;
@@ -579,13 +588,14 @@ class m8f_hn_EventHandler : hn_InitializedEventHandler
     else if (speed <= 1235.11) { speedLevel = ">>>>>";  }
     else                       { speedLevel = ">>>>>>"; }
 
+    Font   font     = smallFont;
     string speedStr = String.Format("%.2f", speed);
     double scale    = 1.0 / _settings.speedometerScale();
     double y        = _settings.speedometerY();
     double x        = _settings.speedometerX();
 
-    y += drawTextCenter(speedLevel, normalColor, scale, x, y, smallfont);
-    drawTextCenter(speedStr, normalColor, scale, x, y, smallfont);
+    y += drawTextCenter(speedLevel, normalColor, scale, x, y, font);
+    drawTextCenter(speedStr, normalColor, scale, x, y, font);
   }
 
   private
@@ -611,6 +621,12 @@ class m8f_hn_EventHandler : hn_InitializedEventHandler
   }
 
   // private: //////////////////////////////////////////////////////////////////
+
+  // Hideous Helmet Compat
+  
+  private Service _HHFunc;
+  
+  // Helscape Navigator Props
 
   private Array<hn_BaseCompassAreaNameSource> _areaNameSources;
   private hn_CompassData     _data;
